@@ -1,4 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import type { User } from 'firebase/auth';
+import { 
+  collection, 
+  doc, 
+  onSnapshot, 
+  setDoc, 
+  addDoc, 
+  deleteDoc,
+  updateDoc
+} from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 export interface Client {
   id: string;
@@ -61,6 +73,10 @@ interface AppContextType {
   invoices: Invoice[];
   settings: CompanySettings;
   theme: 'light' | 'dark';
+  currentUser: User | null;
+  authLoading: boolean;
+  isDemoMode: boolean;
+  setDemoMode: (isDemo: boolean) => void;
   addClient: (client: Omit<Client, 'id' | 'createdAt'>) => Client;
   updateClient: (id: string, client: Partial<Client>) => void;
   deleteClient: (id: string) => void;
@@ -93,51 +109,11 @@ const defaultSettings: CompanySettings = {
 };
 
 const mockClients: Client[] = [
-  {
-    id: 'c1',
-    name: 'Wayne Enterprises',
-    email: 'finance@wayne.corp',
-    phone: '+1 (555) 888-2938',
-    address: '1007 Mountain Drive, Gotham City, NJ 07001',
-    taxId: 'WY-998811',
-    createdAt: '2026-01-10T08:00:00.000Z'
-  },
-  {
-    id: 'c2',
-    name: 'Stark Industries',
-    email: 'accounts@stark.com',
-    phone: '+1 (555) 333-8839',
-    address: '10880 Malibu Point, Malibu, CA 90265',
-    taxId: 'ST-555331',
-    createdAt: '2026-02-15T09:30:00.000Z'
-  },
-  {
-    id: 'c3',
-    name: 'Globex Corporation',
-    email: 'billing@globex.org',
-    phone: '+1 (555) 444-9988',
-    address: '100 Cypress Creek Rd, Cypress Creek, OR 97401',
-    taxId: 'GX-123456',
-    createdAt: '2026-03-20T10:15:00.000Z'
-  },
-  {
-    id: 'c4',
-    name: 'Acme Corporation',
-    email: 'purchasing@acme.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Desert Road, Roadrunner Canyon, AZ 85001',
-    taxId: 'AC-778899',
-    createdAt: '2026-04-05T14:22:00.000Z'
-  },
-  {
-    id: 'c5',
-    name: 'Umbrella Corporation',
-    email: 'accounts@umbrella.com',
-    phone: '+1 (555) 666-3241',
-    address: '500 Raccoon City Plaza, Chicago, IL 60601',
-    taxId: 'UM-666999',
-    createdAt: '2026-05-12T11:05:00.000Z'
-  }
+  { id: 'c1', name: 'Wayne Enterprises', email: 'finance@wayne.corp', phone: '+1 (555) 888-2938', address: '1007 Mountain Drive, Gotham City, NJ 07001', taxId: 'WY-998811', createdAt: '2026-01-10T08:00:00.000Z' },
+  { id: 'c2', name: 'Stark Industries', email: 'accounts@stark.com', phone: '+1 (555) 333-8839', address: '10880 Malibu Point, Malibu, CA 90265', taxId: 'ST-555331', createdAt: '2026-02-15T09:30:00.000Z' },
+  { id: 'c3', name: 'Globex Corporation', email: 'billing@globex.org', phone: '+1 (555) 444-9988', address: '100 Cypress Creek Rd, Cypress Creek, OR 97401', taxId: 'GX-123456', createdAt: '2026-03-20T10:15:00.000Z' },
+  { id: 'c4', name: 'Acme Corporation', email: 'purchasing@acme.com', phone: '+1 (555) 123-4567', address: '123 Desert Road, Roadrunner Canyon, AZ 85001', taxId: 'AC-778899', createdAt: '2026-04-05T14:22:00.000Z' },
+  { id: 'c5', name: 'Umbrella Corporation', email: 'accounts@umbrella.com', phone: '+1 (555) 666-3241', address: '500 Raccoon City Plaza, Chicago, IL 60601', taxId: 'UM-666999', createdAt: '2026-05-12T11:05:00.000Z' }
 ];
 
 const mockInvoices: Invoice[] = [
@@ -260,36 +236,47 @@ const mockInvoices: Invoice[] = [
 ];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Global States
   const [clients, setClients] = useState<Client[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [settings, setSettings] = useState<CompanySettings>(defaultSettings);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  // Load initial data
+  // Firebase Auth states
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+
+  // 1. Listen to Firebase Authentication status changes
   useEffect(() => {
-    const savedClients = localStorage.getItem('crx_clients');
-    const savedInvoices = localStorage.getItem('crx_invoices');
-    const savedSettings = localStorage.getItem('crx_settings');
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+      if (user) {
+        setIsDemoMode(false); // Disable demo sandbox on sign-in
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  // Helper toggle for Demo Sandbox
+  const setDemoMode = (isDemo: boolean) => {
+    setIsDemoMode(isDemo);
+    if (isDemo) {
+      // Load initial local data for demo sandbox
+      const savedClients = localStorage.getItem('crx_clients');
+      const savedInvoices = localStorage.getItem('crx_invoices');
+      const savedSettings = localStorage.getItem('crx_settings');
+
+      setClients(savedClients ? JSON.parse(savedClients) : mockClients);
+      setInvoices(savedInvoices ? JSON.parse(savedInvoices) : mockInvoices);
+      setSettings(savedSettings ? JSON.parse(savedSettings) : defaultSettings);
+    }
+  };
+
+  // 2. Sync Theme Mode (preserved locally)
+  useEffect(() => {
     const savedTheme = localStorage.getItem('crx_theme');
-
-    if (savedClients) setClients(JSON.parse(savedClients));
-    else {
-      setClients(mockClients);
-      localStorage.setItem('crx_clients', JSON.stringify(mockClients));
-    }
-
-    if (savedInvoices) setInvoices(JSON.parse(savedInvoices));
-    else {
-      setInvoices(mockInvoices);
-      localStorage.setItem('crx_invoices', JSON.stringify(mockInvoices));
-    }
-
-    if (savedSettings) setSettings(JSON.parse(savedSettings));
-    else {
-      setSettings(defaultSettings);
-      localStorage.setItem('crx_settings', JSON.stringify(defaultSettings));
-    }
-
     if (savedTheme) {
       setTheme(savedTheme as 'light' | 'dark');
       document.documentElement.setAttribute('data-theme', savedTheme);
@@ -297,6 +284,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       document.documentElement.setAttribute('data-theme', 'light');
     }
   }, []);
+
+  // 3. Listen to Firestore Cloud Database in Real Time (If Authenticated User exists)
+  useEffect(() => {
+    if (!currentUser || isDemoMode) return;
+
+    const uid = currentUser.uid;
+
+    // Listen to settings changes in Firestore
+    const settingsDocRef = doc(db, 'users', uid, 'settings', 'config');
+    const unsubSettings = onSnapshot(settingsDocRef, (snap) => {
+      if (snap.exists()) {
+        setSettings(snap.data() as CompanySettings);
+      } else {
+        // If settings doc doesn't exist, create it with defaults
+        setDoc(settingsDocRef, defaultSettings);
+        setSettings(defaultSettings);
+      }
+    });
+
+    // Listen to clients changes in Firestore
+    const clientsCollRef = collection(db, 'users', uid, 'clients');
+    const unsubClients = onSnapshot(clientsCollRef, (snap) => {
+      const clientsList: Client[] = [];
+      snap.forEach((doc) => {
+        clientsList.push({ id: doc.id, ...doc.data() } as Client);
+      });
+      setClients(clientsList);
+    });
+
+    // Listen to invoices changes in Firestore
+    const invoicesCollRef = collection(db, 'users', uid, 'invoices');
+    const unsubInvoices = onSnapshot(invoicesCollRef, (snap) => {
+      const invoicesList: Invoice[] = [];
+      snap.forEach((doc) => {
+        invoicesList.push({ id: doc.id, ...doc.data() } as Invoice);
+      });
+      setInvoices(invoicesList);
+    });
+
+    return () => {
+      unsubSettings();
+      unsubClients();
+      unsubInvoices();
+    };
+  }, [currentUser, isDemoMode]);
 
   // Update theme helper
   const toggleTheme = () => {
@@ -329,27 +361,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Client CRUD
   const addClient = (clientData: Omit<Client, 'id' | 'createdAt'>) => {
-    const newClient: Client = {
+    const newClientData = {
       ...clientData,
-      id: 'c_' + Math.random().toString(36).substr(2, 9),
       createdAt: new Date().toISOString()
     };
-    const updated = [...clients, newClient];
-    setClients(updated);
-    localStorage.setItem('crx_clients', JSON.stringify(updated));
-    return newClient;
+
+    if (currentUser && !isDemoMode) {
+      // Write to Firestore - UI updates dynamically via onSnapshot listener
+      const clientsCollRef = collection(db, 'users', currentUser.uid, 'clients');
+      addDoc(clientsCollRef, newClientData);
+      return { id: 'temp', ...newClientData } as Client;
+    } else {
+      // Write to localStorage sandbox mode
+      const newClient: Client = {
+        ...newClientData,
+        id: 'c_' + Math.random().toString(36).substr(2, 9)
+      };
+      const updated = [...clients, newClient];
+      setClients(updated);
+      localStorage.setItem('crx_clients', JSON.stringify(updated));
+      return newClient;
+    }
   };
 
   const updateClient = (id: string, updatedData: Partial<Client>) => {
-    const updated = clients.map(c => (c.id === id ? { ...c, ...updatedData } : c));
-    setClients(updated);
-    localStorage.setItem('crx_clients', JSON.stringify(updated));
+    if (currentUser && !isDemoMode) {
+      const clientDocRef = doc(db, 'users', currentUser.uid, 'clients', id);
+      updateDoc(clientDocRef, updatedData);
+    } else {
+      const updated = clients.map(c => (c.id === id ? { ...c, ...updatedData } : c));
+      setClients(updated);
+      localStorage.setItem('crx_clients', JSON.stringify(updated));
+    }
   };
 
   const deleteClient = (id: string) => {
-    const updated = clients.filter(c => c.id !== id);
-    setClients(updated);
-    localStorage.setItem('crx_clients', JSON.stringify(updated));
+    if (currentUser && !isDemoMode) {
+      const clientDocRef = doc(db, 'users', currentUser.uid, 'clients', id);
+      deleteDoc(clientDocRef);
+    } else {
+      const updated = clients.filter(c => c.id !== id);
+      setClients(updated);
+      localStorage.setItem('crx_clients', JSON.stringify(updated));
+    }
   };
 
   // Invoice CRUD
@@ -360,9 +414,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const paddedNum = String(settings.nextInvoiceNumber).padStart(6, '0');
     const invoiceNumber = `${settings.invoicePrefix}${paddedNum}`;
 
-    const newInvoice: Invoice = {
+    const newInvoiceData = {
       ...invoiceData,
-      id: 'inv_' + Math.random().toString(36).substr(2, 9),
       invoiceNumber,
       subtotal,
       taxAmount,
@@ -371,45 +424,88 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString()
     };
 
-    const updatedInvoices = [...invoices, newInvoice];
-    setInvoices(updatedInvoices);
-    localStorage.setItem('crx_invoices', JSON.stringify(updatedInvoices));
+    if (currentUser && !isDemoMode) {
+      // Write to Firestore - UI updates dynamically via snapshots
+      const invoicesCollRef = collection(db, 'users', currentUser.uid, 'invoices');
+      addDoc(invoicesCollRef, newInvoiceData);
 
-    // Update settings auto-increment
-    const updatedSettings = {
-      ...settings,
-      nextInvoiceNumber: settings.nextInvoiceNumber + 1
-    };
-    setSettings(updatedSettings);
-    localStorage.setItem('crx_settings', JSON.stringify(updatedSettings));
+      // Increment number settings configuration
+      const settingsDocRef = doc(db, 'users', currentUser.uid, 'settings', 'config');
+      updateDoc(settingsDocRef, {
+        nextInvoiceNumber: settings.nextInvoiceNumber + 1
+      });
 
-    return newInvoice;
+      return { id: 'temp', ...newInvoiceData } as Invoice;
+    } else {
+      // Write to localStorage sandbox mode
+      const newInvoice: Invoice = {
+        ...newInvoiceData,
+        id: 'inv_' + Math.random().toString(36).substr(2, 9)
+      };
+
+      const updatedInvoices = [...invoices, newInvoice];
+      setInvoices(updatedInvoices);
+      localStorage.setItem('crx_invoices', JSON.stringify(updatedInvoices));
+
+      // Update settings
+      const updatedSettings = {
+        ...settings,
+        nextInvoiceNumber: settings.nextInvoiceNumber + 1
+      };
+      setSettings(updatedSettings);
+      localStorage.setItem('crx_settings', JSON.stringify(updatedSettings));
+
+      return newInvoice;
+    }
   };
 
   const updateInvoice = (id: string, updatedData: Partial<Invoice>) => {
-    const updated = invoices.map(inv => {
-      if (inv.id === id) {
-        const mergedItems = updatedData.items || inv.items;
-        const { subtotal, taxAmount, discountAmount, total } = calculateInvoiceTotals(mergedItems);
-        return {
-          ...inv,
+    if (currentUser && !isDemoMode) {
+      const invoiceDocRef = doc(db, 'users', currentUser.uid, 'invoices', id);
+      
+      // Calculate updated total metrics if items were modified
+      if (updatedData.items) {
+        const { subtotal, taxAmount, discountAmount, total } = calculateInvoiceTotals(updatedData.items);
+        updateDoc(invoiceDocRef, {
           ...updatedData,
           subtotal,
           taxAmount,
           discountAmount,
           total
-        };
+        });
+      } else {
+        updateDoc(invoiceDocRef, updatedData);
       }
-      return inv;
-    });
-    setInvoices(updated);
-    localStorage.setItem('crx_invoices', JSON.stringify(updated));
+    } else {
+      const updated = invoices.map(inv => {
+        if (inv.id === id) {
+          const mergedItems = updatedData.items || inv.items;
+          const { subtotal, taxAmount, discountAmount, total } = calculateInvoiceTotals(mergedItems);
+          return {
+            ...inv,
+            ...updatedData,
+            subtotal,
+            taxAmount,
+            discountAmount,
+            total
+          };
+        }
+        return inv;
+      });
+      setInvoices(updated);
+      localStorage.setItem('crx_invoices', JSON.stringify(updated));
+    }
   };
 
   const deleteInvoice = (id: string) => {
-    const updated = invoices.filter(inv => inv.id !== id);
-    setInvoices(updated);
-    localStorage.setItem('crx_invoices', JSON.stringify(updated));
+    if (currentUser && !isDemoMode) {
+      const invoiceDocRef = doc(db, 'users', currentUser.uid, 'invoices', id);
+      deleteDoc(invoiceDocRef);
+    } else {
+      const updated = invoices.filter(inv => inv.id !== id);
+      setInvoices(updated);
+      localStorage.setItem('crx_invoices', JSON.stringify(updated));
+    }
   };
 
   const duplicateInvoice = (id: string) => {
@@ -419,31 +515,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const paddedNum = String(settings.nextInvoiceNumber).padStart(6, '0');
     const invoiceNumber = `${settings.invoicePrefix}${paddedNum}`;
 
-    const newInvoice: Invoice = {
+    const newInvoiceData = {
       ...source,
-      id: 'inv_' + Math.random().toString(36).substr(2, 9),
       invoiceNumber,
-      status: 'Draft',
+      status: 'Draft' as InvoiceStatus,
       createdAt: new Date().toISOString()
     };
 
-    const updatedInvoices = [...invoices, newInvoice];
-    setInvoices(updatedInvoices);
-    localStorage.setItem('crx_invoices', JSON.stringify(updatedInvoices));
+    if (currentUser && !isDemoMode) {
+      const invoicesCollRef = collection(db, 'users', currentUser.uid, 'invoices');
+      addDoc(invoicesCollRef, newInvoiceData);
 
-    const updatedSettings = {
-      ...settings,
-      nextInvoiceNumber: settings.nextInvoiceNumber + 1
-    };
-    setSettings(updatedSettings);
-    localStorage.setItem('crx_settings', JSON.stringify(updatedSettings));
+      const settingsDocRef = doc(db, 'users', currentUser.uid, 'settings', 'config');
+      updateDoc(settingsDocRef, {
+        nextInvoiceNumber: settings.nextInvoiceNumber + 1
+      });
+    } else {
+      const newInvoice: Invoice = {
+        ...newInvoiceData,
+        id: 'inv_' + Math.random().toString(36).substr(2, 9)
+      };
+
+      const updatedInvoices = [...invoices, newInvoice];
+      setInvoices(updatedInvoices);
+      localStorage.setItem('crx_invoices', JSON.stringify(updatedInvoices));
+
+      const updatedSettings = {
+        ...settings,
+        nextInvoiceNumber: settings.nextInvoiceNumber + 1
+      };
+      setSettings(updatedSettings);
+      localStorage.setItem('crx_settings', JSON.stringify(updatedSettings));
+    }
   };
 
   // Company Settings
   const updateSettings = (updatedData: Partial<CompanySettings>) => {
-    const updated = { ...settings, ...updatedData };
-    setSettings(updated);
-    localStorage.setItem('crx_settings', JSON.stringify(updated));
+    if (currentUser && !isDemoMode) {
+      const settingsDocRef = doc(db, 'users', currentUser.uid, 'settings', 'config');
+      updateDoc(settingsDocRef, updatedData);
+    } else {
+      const updated = { ...settings, ...updatedData };
+      setSettings(updated);
+      localStorage.setItem('crx_settings', JSON.stringify(updated));
+    }
   };
 
   // Import / Export Database
@@ -452,12 +567,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!Array.isArray(data.clients) || !Array.isArray(data.invoices) || !data.settings) {
         return false;
       }
-      setClients(data.clients);
-      setInvoices(data.invoices);
-      setSettings(data.settings);
-      localStorage.setItem('crx_clients', JSON.stringify(data.clients));
-      localStorage.setItem('crx_invoices', JSON.stringify(data.invoices));
-      localStorage.setItem('crx_settings', JSON.stringify(data.settings));
+      
+      if (currentUser && !isDemoMode) {
+        // Upload batch to Firestore
+        data.clients.forEach(c => {
+          const docRef = doc(db, 'users', currentUser.uid, 'clients', c.id || Math.random().toString(36).substr(2, 9));
+          setDoc(docRef, { name: c.name, email: c.email, phone: c.phone || '', address: c.address || '', taxId: c.taxId || '', createdAt: c.createdAt || new Date().toISOString() });
+        });
+
+        data.invoices.forEach(inv => {
+          const docRef = doc(db, 'users', currentUser.uid, 'invoices', inv.id || Math.random().toString(36).substr(2, 9));
+          setDoc(docRef, {
+            invoiceNumber: inv.invoiceNumber,
+            clientId: inv.clientId,
+            issueDate: inv.issueDate,
+            dueDate: inv.dueDate,
+            items: inv.items,
+            notes: inv.notes || '',
+            terms: inv.terms || '',
+            paymentDetails: inv.paymentDetails || '',
+            status: inv.status,
+            subtotal: inv.subtotal,
+            taxAmount: inv.taxAmount,
+            discountAmount: inv.discountAmount,
+            total: inv.total,
+            createdAt: inv.createdAt || new Date().toISOString()
+          });
+        });
+
+        const settingsDocRef = doc(db, 'users', currentUser.uid, 'settings', 'config');
+        setDoc(settingsDocRef, data.settings);
+      } else {
+        setClients(data.clients);
+        setInvoices(data.invoices);
+        setSettings(data.settings);
+        localStorage.setItem('crx_clients', JSON.stringify(data.clients));
+        localStorage.setItem('crx_invoices', JSON.stringify(data.invoices));
+        localStorage.setItem('crx_settings', JSON.stringify(data.settings));
+      }
       return true;
     } catch {
       return false;
@@ -475,6 +622,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         invoices,
         settings,
         theme,
+        currentUser,
+        authLoading,
+        isDemoMode,
+        setDemoMode,
         addClient,
         updateClient,
         deleteClient,

@@ -6,6 +6,9 @@ import { InvoiceEditorView } from './views/InvoiceEditorView';
 import { InvoiceViewer } from './views/InvoiceViewer';
 import { ClientsView } from './views/ClientsView';
 import { SettingsView } from './views/SettingsView';
+import { AuthView } from './views/AuthView';
+import { signOut } from 'firebase/auth';
+import { auth } from './firebase';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -14,12 +17,23 @@ import {
   Sun,
   Moon,
   Menu,
-  X
+  X,
+  LogOut,
+  Sparkles
 } from 'lucide-react';
 import './styles/global.css';
 
 function MainAppContent() {
-  const { theme, toggleTheme, settings } = useApp();
+  const { 
+    theme, 
+    toggleTheme, 
+    settings, 
+    currentUser, 
+    authLoading, 
+    isDemoMode, 
+    setDemoMode 
+  } = useApp();
+  
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   
   // Navigation / Editor states
@@ -28,6 +42,21 @@ function MainAppContent() {
 
   // Mobile sidebar state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Auth logout / leave demo actions
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setActiveTab('dashboard');
+    } catch (err) {
+      console.error("Sign out error:", err);
+    }
+  };
+
+  const handleLeaveDemo = () => {
+    setDemoMode(false);
+    setActiveTab('dashboard');
+  };
 
   // Active view renderer
   const renderActiveView = () => {
@@ -103,6 +132,33 @@ function MainAppContent() {
     setMobileMenuOpen(false);
   };
 
+  // 1. Loading State (Shimmer Loader)
+  if (authLoading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-app)', gap: '16px' }}>
+        <div style={{ 
+          width: '50px', 
+          height: '50px', 
+          border: '4px solid var(--border-color)', 
+          borderTopColor: 'var(--primary)', 
+          borderRadius: '50%', 
+          animation: 'spin 1s linear infinite' 
+        }}></div>
+        <p className="text-muted" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Securing Creonex Session...</p>
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated State (Auth Gate View)
+  if (!currentUser && !isDemoMode) {
+    return <AuthView onBypassDemo={() => setDemoMode(true)} />;
+  }
+
   return (
     <div className="app-container">
       {/* Sidebar navigation */}
@@ -154,14 +210,56 @@ function MainAppContent() {
           </li>
         </ul>
 
-        <div className="sidebar-footer">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e2e8f0' }}>Creonex Invoice</div>
-            <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>v1.0.0 (Local OS)</div>
+        {/* Sidebar Footer with Sign Out options */}
+        <div className="sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'stretch', padding: '16px 20px' }}>
+          
+          {/* User Info tag */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '140px' }}>
+              {isDemoMode ? (
+                <>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--warning-text)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Sparkles size={12} /> Sandbox Mode
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Local Offline Data</div>
+                </>
+              ) : (
+                <>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 750, color: '#f8fafc', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {currentUser?.email?.split('@')[0]}
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={currentUser?.email || ''}>
+                    {currentUser?.email}
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <button className="theme-toggle-btn" onClick={toggleTheme} title="Switch Theme Mode" style={{ flexShrink: 0 }}>
+              {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+            </button>
           </div>
-          <button className="theme-toggle-btn" onClick={toggleTheme} title="Switch theme mode">
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
+
+          <div style={{ height: '1px', backgroundColor: 'rgba(255,255,255,0.08)' }}></div>
+
+          {/* Action logs logouts */}
+          {isDemoMode ? (
+            <button 
+              className="sidebar-item-btn" 
+              onClick={handleLeaveDemo}
+              style={{ padding: '8px 12px', fontSize: '0.75rem', color: 'var(--warning-text)', background: 'rgba(245, 158, 11, 0.1)', justifyContent: 'center' }}
+            >
+              Leave Sandbox
+            </button>
+          ) : (
+            <button 
+              className="sidebar-item-btn" 
+              onClick={handleLogout}
+              style={{ padding: '8px 12px', fontSize: '0.75rem', color: 'var(--danger-text)', background: 'rgba(239, 68, 68, 0.08)', justifyContent: 'center' }}
+            >
+              <LogOut size={14} style={{ marginRight: '6px' }} /> Sign Out
+            </button>
+          )}
         </div>
       </aside>
 
