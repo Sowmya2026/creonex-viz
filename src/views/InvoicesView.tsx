@@ -155,7 +155,7 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
     setStartDate('');
     setEndDate('');
     setMinAmount('');
-    maxAmount && setMaxAmount('');
+    if (maxAmount) setMaxAmount('');
   };
 
   return (

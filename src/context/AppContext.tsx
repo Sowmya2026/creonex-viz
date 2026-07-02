@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
@@ -301,6 +302,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setDoc(settingsDocRef, defaultSettings);
         setSettings(defaultSettings);
       }
+    }, (err) => {
+      console.warn("Firestore Settings listener warning:", err);
     });
 
     // Listen to clients changes in Firestore
@@ -311,6 +314,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         clientsList.push({ id: doc.id, ...doc.data() } as Client);
       });
       setClients(clientsList);
+    }, (err) => {
+      console.warn("Firestore Clients listener warning:", err);
     });
 
     // Listen to invoices changes in Firestore
@@ -321,6 +326,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         invoicesList.push({ id: doc.id, ...doc.data() } as Invoice);
       });
       setInvoices(invoicesList);
+    }, (err) => {
+      console.warn("Firestore Invoices listener warning:", err);
     });
 
     return () => {
