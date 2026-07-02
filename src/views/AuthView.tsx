@@ -3,7 +3,8 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect
 } from 'firebase/auth';
 import { auth } from '../firebase';
 import { Mail, Lock, AlertCircle, ShieldAlert, Sparkles } from 'lucide-react';
@@ -70,9 +71,21 @@ export const AuthView: React.FC<AuthViewProps> = ({ onBypassDemo }) => {
     try {
       await signInWithPopup(auth, provider);
     } catch (err: any) {
-      console.error(err);
+      console.error("Popup sign-in failed:", err);
       let friendlyMsg = err.message;
-      if (err.code === 'auth/popup-closed-by-user') {
+      if (err.code === 'auth/popup-blocked') {
+        friendlyMsg = "Sign-in popup was blocked by your browser. Redirecting you to sign in instead...";
+        setErrorMsg(friendlyMsg);
+        
+        // Auto-fallback: redirect the window directly to bypass browser blocker
+        try {
+          await signInWithRedirect(auth, provider);
+          return; // Redirect transitions page, execution ends here
+        } catch (redirectErr: any) {
+          console.error("Redirect sign-in failed:", redirectErr);
+          friendlyMsg = "Sign-in popup blocked. Redirection failed: " + redirectErr.message;
+        }
+      } else if (err.code === 'auth/popup-closed-by-user') {
         friendlyMsg = "Sign-in popup was closed before completion.";
       } else if (err.code === 'auth/cancelled-popup-request') {
         friendlyMsg = "Sign-in request was cancelled.";
