@@ -165,7 +165,7 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
       {/* Main Panel Layout */}
       <div className={selectedClientId ? "clients-layout" : "grid-cols-1"}>
         {/* Left Side: Client Database */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div className={`client-list-panel ${selectedClientId ? 'hidden-mobile' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Search Box */}
           <div className="card" style={{ padding: '16px' }}>
             <div style={{ position: 'relative' }}>
@@ -253,12 +253,56 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile CRM Client Cards List */}
+            <div className="mobile-client-list">
+              {filteredClients.length === 0 ? (
+                <div className="card" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+                  No clients found in database.
+                </div>
+              ) : (
+                filteredClients.map((client) => {
+                  const stats = clientStats[client.id] || { ltv: 0, outstanding: 0, count: 0 };
+                  return (
+                    <div 
+                      key={`mob-c-${client.id}`} 
+                      className="card mobile-client-card" 
+                      onClick={() => setSelectedClientId(client.id)}
+                      style={{ display: 'flex', flexDirection: 'column', gap: '10px', cursor: 'pointer' }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--text-main)' }}>
+                          {client.name}
+                        </span>
+                        <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                          {stats.count} Invoices
+                        </span>
+                      </div>
+                      
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                        <span className="text-muted" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '170px' }}>{client.email}</span>
+                        <span style={{ fontWeight: 700, color: 'var(--success)' }}>
+                          {formatCurrency(stats.ltv, settings.currency)}
+                        </span>
+                      </div>
+
+                      {stats.outstanding > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--warning-text)', backgroundColor: 'var(--warning-light)', padding: '4px 8px', borderRadius: 'var(--radius-xs)' }}>
+                          <span>Outstanding:</span>
+                          <span style={{ fontWeight: 700 }}>{formatCurrency(stats.outstanding, settings.currency)}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
 
         {/* Right Side: Client Panel Details (Only open when client selected) */}
         {selectedClient && (
-          <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '24px', borderLeft: '3px solid var(--primary)' }}>
+          <div className={`card client-details-panel ${!selectedClientId ? 'hidden-mobile' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '24px', borderLeft: '3px solid var(--primary)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <h3 className="text-xl">{selectedClient.name}</h3>

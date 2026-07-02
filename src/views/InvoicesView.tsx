@@ -369,6 +369,49 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
             </tbody>
           </table>
         </div>
+
+        {/* Mobile-Friendly Cards List */}
+        <div className="mobile-invoice-list">
+          {filteredInvoices.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)' }}>
+              No invoices match your search filters.
+            </div>
+          ) : (
+            filteredInvoices.map((inv) => (
+              <div key={`mob-${inv.id}`} className="card mobile-invoice-card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1rem', cursor: 'pointer' }} onClick={() => handleViewDetails(inv.id)}>
+                    {inv.invoiceNumber}
+                  </span>
+                  <span className={`badge badge-${inv.status.toLowerCase()}`}>
+                    {inv.status}
+                  </span>
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>{getClientName(inv.clientId)}</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    Due: {formatDate(inv.dueDate)}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '10px', marginTop: '4px' }}>
+                  <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)' }}>
+                    {formatCurrency(inv.total, settings.currency)}
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => handleViewDetails(inv.id)}>
+                      View
+                    </button>
+                    <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }} onClick={() => handleEditInvoice(inv.id)}>
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
