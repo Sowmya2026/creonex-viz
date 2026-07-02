@@ -30,6 +30,7 @@ export const SettingsView: React.FC = () => {
   const [nextInvoiceNumber, setNextInvoiceNumber] = useState(settings.nextInvoiceNumber);
   const [termsAndConditions, setTermsAndConditions] = useState(settings.termsAndConditions || '');
   const [logoUrl, setLogoUrl] = useState(settings.logoUrl || '');
+  const [accountName, setAccountName] = useState(settings.accountName || '');
 
   // Notifications
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -52,7 +53,8 @@ export const SettingsView: React.FC = () => {
       invoicePrefix,
       nextInvoiceNumber: Number(nextInvoiceNumber),
       termsAndConditions,
-      logoUrl
+      logoUrl,
+      accountName
     });
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
@@ -101,6 +103,7 @@ export const SettingsView: React.FC = () => {
             setNextInvoiceNumber(parsed.settings.nextInvoiceNumber);
             setTermsAndConditions(parsed.settings.termsAndConditions || '');
             setLogoUrl(parsed.settings.logoUrl || '');
+            setAccountName(parsed.settings.accountName || '');
           }
         } else {
           setImportStatus({ success: false, msg: 'Invalid backup file structure. Import aborted.' });
@@ -189,7 +192,7 @@ export const SettingsView: React.FC = () => {
 
               <div className="form-row">
                 <div className="form-group" style={{ flex: 1 }}>
-                  <label className="form-label">Tax ID / Business Registration (RFC/EIN)</label>
+                  <label className="form-label">GSTIN / Tax ID (RFC/EIN)</label>
                   <input type="text" value={taxId} onChange={(e) => setTaxId(e.target.value)} className="form-input" />
                 </div>
                 <div className="form-group" style={{ flex: 2 }}>
@@ -207,19 +210,25 @@ export const SettingsView: React.FC = () => {
                 </h3>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Bank Name</label>
-                <input type="text" value={bankName} onChange={(e) => setBankName(e.target.value)} className="form-input" placeholder="e.g. Silicon Valley Trust" />
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Account Holder Name</label>
+                  <input type="text" value={accountName} onChange={(e) => setAccountName(e.target.value)} className="form-input" placeholder="e.g. Ms. Beemer Sowmya" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Bank Name</label>
+                  <input type="text" value={bankName} onChange={(e) => setBankName(e.target.value)} className="form-input" placeholder="e.g. State Bank of India" />
+                </div>
               </div>
 
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Account Number</label>
-                  <input type="text" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} className="form-input" placeholder="e.g. 4099-2811-0988" />
+                  <input type="text" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} className="form-input" placeholder="e.g. 62148855051" />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Routing Number / SWIFT Code</label>
-                  <input type="text" value={routingNumber} onChange={(e) => setRoutingNumber(e.target.value)} className="form-input" placeholder="e.g. SVB129988" />
+                  <label className="form-label">IFSC Code / Routing Code</label>
+                  <input type="text" value={routingNumber} onChange={(e) => setRoutingNumber(e.target.value)} className="form-input" placeholder="e.g. SBIN0020295" />
                 </div>
               </div>
             </div>

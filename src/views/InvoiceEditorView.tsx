@@ -29,7 +29,7 @@ export const InvoiceEditorView: React.FC<InvoiceEditorViewProps> = ({
   const [notes, setNotes] = useState('');
   const [terms, setTerms] = useState(settings.termsAndConditions || '');
   const [paymentDetails, setPaymentDetails] = useState(
-    `Wire Transfer: ${settings.bankName}\nAccount: ${settings.accountNumber}\nRouting: ${settings.routingNumber}`
+    `Account Name: ${settings.accountName || settings.name}\nBank Name: ${settings.bankName}\nAccount Number: ${settings.accountNumber}\nIFSC Code: ${settings.routingNumber}`
   );
 
   // Line items
@@ -81,7 +81,7 @@ export const InvoiceEditorView: React.FC<InvoiceEditorViewProps> = ({
       setNotes('');
       setTerms(settings.termsAndConditions || '');
       setPaymentDetails(
-        `Wire Transfer: ${settings.bankName}\nAccount: ${settings.accountNumber}\nRouting: ${settings.routingNumber}`
+        `Account Name: ${settings.accountName || settings.name}\nBank Name: ${settings.bankName}\nAccount Number: ${settings.accountNumber}\nIFSC Code: ${settings.routingNumber}`
       );
       setItems([{ name: '', description: '', quantity: 1, price: 0, taxRate: 0, discount: 0 }]);
     }

@@ -67,6 +67,7 @@ export interface CompanySettings {
   nextInvoiceNumber: number;
   logoUrl?: string;
   termsAndConditions?: string;
+  accountName?: string;
 }
 
 interface AppContextType {
@@ -96,17 +97,18 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const defaultSettings: CompanySettings = {
   name: 'Creonex Technologies Ltd',
   email: 'finance@creonex.com',
-  phone: '+1 (555) 234-5678',
-  address: '100 Innovation Way, Suite 400, San Francisco, CA 94107',
-  taxId: 'US-887462-B',
-  bankName: 'Silicon Valley Trust',
-  accountNumber: '4099-2811-0988',
-  routingNumber: 'SVB129988',
-  currency: 'USD',
+  phone: '+91 98765 43210',
+  address: '100 Innovation Way, Suite 400, Bangalore, KA 560001',
+  taxId: '29AAAAA0000A1Z5',
+  bankName: 'State Bank of India',
+  accountNumber: '62148855051',
+  routingNumber: 'SBIN0020295',
+  currency: 'INR',
   invoicePrefix: 'CRX-',
   nextInvoiceNumber: 7,
   logoUrl: '/logo.png',
-  termsAndConditions: 'Payment is due within 15 days of invoice date. Thank you for your business!'
+  termsAndConditions: 'Payment is due within 15 days of invoice date. Thank you for your business!',
+  accountName: 'Ms. Beemer Sowmya'
 };
 
 const mockClients: Client[] = [
@@ -130,7 +132,7 @@ const mockInvoices: Invoice[] = [
     ],
     notes: 'Please include the invoice number in your wire transfer comments.',
     terms: 'Net 15',
-    paymentDetails: 'Wire Transfer: Silicon Valley Trust\nAccount: 4099-2811-0988\nRouting: SVB129988',
+    paymentDetails: 'Account Name: Ms. Beemer Sowmya\nBank Name: State Bank of India\nAccount Number: 62148855051\nIFSC Code: SBIN0020295',
     status: 'Paid',
     subtotal: 13000,
     taxAmount: 1875,
@@ -150,7 +152,7 @@ const mockInvoices: Invoice[] = [
     ],
     notes: 'Support is covered under SLA tier 1.',
     terms: 'Net 15',
-    paymentDetails: 'Wire Transfer: Silicon Valley Trust\nAccount: 4099-2811-0988\nRouting: SVB129988',
+    paymentDetails: 'Account Name: Ms. Beemer Sowmya\nBank Name: State Bank of India\nAccount Number: 62148855051\nIFSC Code: SBIN0020295',
     status: 'Paid',
     subtotal: 8700,
     taxAmount: 1035,
@@ -170,7 +172,7 @@ const mockInvoices: Invoice[] = [
     ],
     notes: 'Monthly billing for June sprints.',
     terms: 'Net 30',
-    paymentDetails: 'Wire Transfer: Silicon Valley Trust\nAccount: 4099-2811-0988\nRouting: SVB129988',
+    paymentDetails: 'Account Name: Ms. Beemer Sowmya\nBank Name: State Bank of India\nAccount Number: 62148855051\nIFSC Code: SBIN0020295',
     status: 'Unpaid',
     subtotal: 6400,
     taxAmount: 768,
@@ -189,7 +191,7 @@ const mockInvoices: Invoice[] = [
     ],
     notes: 'Please settle this overdue invoice immediately.',
     terms: 'Due on Receipt',
-    paymentDetails: 'Wire Transfer: Silicon Valley Trust\nAccount: 4099-2811-0988\nRouting: SVB129988',
+    paymentDetails: 'Account Name: Ms. Beemer Sowmya\nBank Name: State Bank of India\nAccount Number: 62148855051\nIFSC Code: SBIN0020295',
     status: 'Overdue',
     subtotal: 2500,
     taxAmount: 382.5,
@@ -208,7 +210,7 @@ const mockInvoices: Invoice[] = [
     ],
     notes: 'Draft review copy. Not finalized.',
     terms: 'Net 30',
-    paymentDetails: 'Wire Transfer: Silicon Valley Trust\nAccount: 4099-2811-0988\nRouting: SVB129988',
+    paymentDetails: 'Account Name: Ms. Beemer Sowmya\nBank Name: State Bank of India\nAccount Number: 62148855051\nIFSC Code: SBIN0020295',
     status: 'Draft',
     subtotal: 12000,
     taxAmount: 1800,
