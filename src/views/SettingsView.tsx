@@ -132,10 +132,10 @@ export const SettingsView: React.FC = () => {
     <div className="content-container">
       {/* View Header */}
       <div>
-        <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '2rem', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+        <h1 className="view-title">
           Settings
         </h1>
-        <p className="text-muted">Configure company profiles, default billing variables, and backup states.</p>
+        <p className="view-subtitle">Configure company profiles, default billing variables, and backup states.</p>
       </div>
 
       {saveSuccess && (

@@ -163,10 +163,10 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
       {/* View Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '2rem', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+          <h1 className="view-title">
             Invoices
           </h1>
-          <p className="text-muted">Manage, track, and export billing transactions.</p>
+          <p className="view-subtitle">Manage, track, and export billing transactions.</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className="btn btn-secondary" onClick={exportToCSV}>

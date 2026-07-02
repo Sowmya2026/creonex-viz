@@ -320,10 +320,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Welcome Banner & Monthly Controls */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '2.0rem', letterSpacing: '-0.025em', marginBottom: '4px' }}>
+          <h1 className="view-title">
             Monthly Income Checkup
           </h1>
-          <p className="text-muted">Analyze detailed monthly revenue balances, taxes, and income trends.</p>
+          <p className="view-subtitle">Analyze detailed monthly revenue balances, taxes, and income trends.</p>
         </div>
 
         {/* Filters bar */}

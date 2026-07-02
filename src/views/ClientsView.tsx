@@ -152,10 +152,10 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
       {/* View Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '2rem', letterSpacing: '-0.02em', marginBottom: '4px' }}>
+          <h1 className="view-title">
             Client CRM
           </h1>
-          <p className="text-muted">Maintain business relationships, records, and client value indicators.</p>
+          <p className="view-subtitle">Maintain business relationships, records, and client value indicators.</p>
         </div>
         <button className="btn btn-primary" onClick={openAddModal}>
           <Plus size={18} /> Add Client
