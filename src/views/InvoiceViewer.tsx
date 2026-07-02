@@ -50,9 +50,14 @@ export const InvoiceViewer: React.FC<InvoiceViewerProps> = ({
     );
   }
 
-  // Trigger print dialogue
+  // Trigger print dialogue with page title set to the invoice number (controls default PDF filename)
   const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = invoice.invoiceNumber;
     window.print();
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 100);
   };
 
   // Quick share / copy info
