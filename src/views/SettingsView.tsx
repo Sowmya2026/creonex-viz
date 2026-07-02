@@ -162,7 +162,7 @@ export const SettingsView: React.FC = () => {
       )}
 
       <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }} className="grid-cols-2">
+        <div className="layout-split">
           
           {/* Left Columns - Settings Fields */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

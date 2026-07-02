@@ -431,7 +431,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Main Section Grid (Chart + Monthly Statements Breakdown) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }} className="grid-cols-2">
+      <div className="layout-split">
         {/* Dynamic SVG Chart */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
           <div className="card-header">
@@ -565,7 +565,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {/* Third Row: Recent Invoices & Top Spenders */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }} className="grid-cols-2">
+      <div className="layout-split">
         
         {/* Recent Invoices Table */}
         <div className="card" style={{ padding: 0 }}>

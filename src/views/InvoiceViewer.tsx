@@ -122,10 +122,13 @@ export const InvoiceViewer: React.FC<InvoiceViewerProps> = ({
         </div>
       </div>
 
-      {/* Invoice Document Canvas (A4 Styling) */}
-      <div className="card invoice-print-container" style={{ 
-        maxWidth: '850px', 
-        margin: '0 auto', 
+      {/* Scrollable container for mobile */}
+      <div className="invoice-scroll-wrapper" style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '16px' }}>
+        {/* Invoice Document Canvas (A4 Styling) */}
+        <div className="card invoice-print-container" style={{ 
+          minWidth: '800px',
+          maxWidth: '850px', 
+          margin: '0 auto', 
         padding: '50px', 
         backgroundColor: '#ffffff', 
         color: '#0f172a',
@@ -334,5 +337,6 @@ export const InvoiceViewer: React.FC<InvoiceViewerProps> = ({
         )}
       </div>
     </div>
-  );
+  </div>
+);
 };

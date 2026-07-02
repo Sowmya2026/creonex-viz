@@ -243,7 +243,7 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
 
         {/* Advanced Filters Drawer */}
         {showAdvancedFilters && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginTop: '16px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+          <div className="filter-grid" style={{ marginTop: '16px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label">From Date</label>
               <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="form-input" />

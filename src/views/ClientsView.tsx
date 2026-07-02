@@ -163,7 +163,7 @@ export const ClientsView: React.FC<ClientsViewProps> = ({
       </div>
 
       {/* Main Panel Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: selectedClientId ? '1.5fr 1fr' : '1fr', gap: '32px' }} className="grid-cols-2">
+      <div className={selectedClientId ? "clients-layout" : "grid-cols-1"}>
         {/* Left Side: Client Database */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Search Box */}

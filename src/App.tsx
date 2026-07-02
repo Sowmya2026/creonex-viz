@@ -270,7 +270,7 @@ function MainAppContent() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
-              style={{ display: 'none', background: 'var(--border-color)', color: 'var(--text-main)', padding: '6px' }}
+              style={{ background: 'var(--border-color)', color: 'var(--text-main)', padding: '6px' }}
               className="theme-toggle-btn btn-icon mobile-menu-toggle"
             >
               <Menu size={20} />
