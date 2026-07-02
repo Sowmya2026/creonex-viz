@@ -1,0 +1,52 @@
+@media print {
+  /* Hide all non-printable UI panels */
+  .sidebar,
+  .topbar,
+  .btn,
+  .btn-icon,
+  .viewer-actions,
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  /* Reset main page container */
+  body, 
+  .app-container, 
+  .main-wrapper, 
+  .content-container {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+  }
+
+  .main-wrapper {
+    margin-left: 0 !important;
+  }
+
+  /* Expand print area container */
+  .invoice-print-container {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    width: 100% !important;
+  }
+
+  /* Force page size configuration */
+  @page {
+    size: A4 portrait;
+    margin: 20mm;
+  }
+
+  /* Keep badge borders clean for print */
+  .badge {
+    border: 1px solid #000000 !important;
+    color: #000000 !important;
+    background: transparent !important;
+  }
+}

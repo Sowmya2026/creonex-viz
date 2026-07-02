@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Typography */
+  --font-heading: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Common transitions & layouts */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows - Premium Elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+
+  /* Light Theme Palette (Default) */
+  --bg-app: #f8fafc;
+  --bg-sidebar: #0f172a;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-input: #ffffff;
+  
+  --border-color: #e2e8f0;
+  --border-focus: #6366f1;
+  --border-card: #e2e8f0;
+
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #e0e7ff;
+  --primary-glow: rgba(79, 70, 229, 0.15);
+
+  --success: #10b981;
+  --success-light: #d1fae5;
+  --success-text: #065f46;
+
+  --warning: #f59e0b;
+  --warning-light: #fef3c7;
+  --warning-text: #92400e;
+
+  --danger: #ef4444;
+  --danger-light: #fee2e2;
+  --danger-text: #991b1b;
+
+  --info: #06b6d4;
+  --info-light: #ecfeff;
+  --info-text: #155e75;
+
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(226, 232, 240, 0.8);
+  --glass-blur: 16px;
+}
+
+[data-theme="dark"] {
+  /* Dark Theme Palette */
+  --bg-app: #09090b;
+  --bg-sidebar: #09090b;
+  --bg-card: #18181b;
+  --bg-card-hover: #202024;
+  --bg-input: #0f0f11;
+
+  --border-color: #27272a;
+  --border-focus: #818cf8;
+  --border-card: #27272a;
+
+  --text-main: #f4f4f5;
+  --text-muted: #a1a1aa;
+  --text-inverse: #09090b;
+
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-light: #1e1b4b;
+  --primary-glow: rgba(99, 102, 241, 0.25);
+
+  --success: #10b981;
+  --success-light: #064e3b;
+  --success-text: #a7f3d0;
+
+  --warning: #fbbf24;
+  --warning-light: #78350f;
+  --warning-text: #fde68a;
+
+  --danger: #f87171;
+  --danger-light: #7f1d1d;
+  --danger-text: #fca5a5;
+
+  --info: #22d3ee;
+  --info-light: #164e63;
+  --info-text: #99f6e4;
+
+  --glass-bg: rgba(24, 24, 27, 0.6);
+  --glass-border: rgba(39, 39, 42, 0.6);
+  --glass-blur: 20px;
+}
